@@ -1,0 +1,8 @@
+swarm:
+  datasources:
+    data-sources:
+      MyDS:
+        driver-name: org.postgresql.Driver
+        connection-url: jdbc:postgresql://localhost:5432/postgres;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+        user-name: postgres
+        password: admin
