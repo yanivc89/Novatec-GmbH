@@ -1,0 +1,169 @@
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<title>Insert title here</title>
+
+<script type="text/javascript">
+
+
+$(document).on('click', '.delete', function(){
+	var url = "api/deleteEmployee/" + $(this).attr("id");
+	$.ajax({url: url, success: function(result){		
+		alert( result );
+	}
+	})
+	
+})
+
+$(document).ready(function(){
+	
+	$("#deptdetails").on("click", function(){
+		var htmlString = "<h2> Departments </h2>";
+		$.ajax({url: "api/allDepartments", success: function(result){
+            $.each(result, function(index, department){
+            	htmlString = htmlString + " Department Name : <a href='#' class='deptClass' id='" + department.id + "'> " + department.name + "</a><p> HOD : " + department.hod + "</p><button class='delete' id='"+ department.id + "'>Delete</button><br><br>";
+            })
+
+            $("#departmentList").html(htmlString);
+        }});
+		
+	})
+	
+	
+	$("#faultTolerance").on("click", function(){
+		$("#departmentList").html("");
+		$.ajax({url: "api/countWithFaultTolerance", success: function(result){
+			$("#departmentList").html("<h3>" + result + "<h3>");
+		}
+		})
+		
+	})
+	
+	$("#faultToleranceWithFallback").on("click", function(){
+		$("#departmentList").html("");
+		$.ajax({url: "api/countWithFaultToleranceWithFallBack", success: function(result){
+			$("#departmentList").html("<h3>" + result + "<h3>");
+		}
+		})
+		
+	})
+	
+	
+	$("#microConfig").on("click", function(){
+		$("#departmentList").html("");
+		$.ajax({url: "api/configProperties", success: function(result){
+			$("#departmentList").html( result );
+		}
+		})
+		
+	})
+	
+	$("#microRetry").on("click", function(){
+		$("#departmentList").html("");
+		$.ajax({url: "api/faultToleranceRetry", success: function(result){
+			$("#departmentList").html("<h3>" + result + "<h3>");
+		}
+		})
+		
+	})
+	
+	
+	$("#microTimeout").on("click", function(){
+		$("#departmentList").html("");
+		$.ajax({url: "api/faultToleranceTimeout", success: function(result){
+			$("#departmentList").html( "<h3>" + result + "<h3>" );
+		}
+		})
+		
+	})
+	
+	$("#microBulkhead").on("click", function(){
+		$("#departmentList").html("");
+		$.ajax({url: "api/faultToleranceBulkhead", success: function(result){
+			$("#departmentList").html( "<h3>" + result + "<h3>" );
+		}
+		})
+		
+	})
+	
+
+})
+
+</script>
+
+
+</head>
+<body>
+
+<h1> Welcome to Microprofile demo </h1> <button id="deptdetails"> Department details </button> <button id="faultTolerance">Test Fault Tolerance</button>
+<button id="faultToleranceWithFallback">Test Fall back</button>&nbsp;<button id="microConfig">Test Microprofile config</button>
+&nbsp;<button id="microRetry">Test Microprofile retry</button>
+&nbsp;<button id="microTimeout">Test Microprofile timeout</button>
+&nbsp;<button id="microBulkhead">Test Microprofile bulkhead</button>
+
+<div id="departmentList"></div>
+
+<div id="info" style="margin-top: 100px;">
+	<h3><u>Information on the buttons</u></h3>
+	<p><b>1. Department details</b> : This button demonstrates the Microprofile CDI, JSONP and JAX-RS functionality by fetching the available department and its details.
+	<p><b>2. Test Fault tolerance</b> : This button demonstrates the Circuit breaker configuration of Microprofile Fault tolerance
+<br>
+<b>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;@CircuitBreaker(requestVolumeThreshold=2, failureRatio=0.50, delay=5000, successThreshold=2)</b>
+<br>
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;As per the configuration, Circuit breaker gets triggered on every 2 requests ( <b>requestVolumenThreshold = 2</b> ) and checks for the failures.
+<br>
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;In case of number of failed requests equals 1 (  <b>requestVolumeThreshold * failureRatio i.e. 2 * 0.5 = 1 </b> ), The circuit breaker goes
+<br>
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;to open state in which any further incoming requests are turn down without processing. After a time span of 5 seconds ( <b>delay = 5000</b> ),  
+<br> 
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;The circuit breaker goes to half-open state where requests are allowed for processing and failure check is carried out again. This time, 
+<br>
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;every request with a fail response switches the circuit breaker back to open state and every passage of 5 seconds repeats the cycle of half-open state. 
+<br>
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;In case of number of success requests equals 2 ( <b>successThreshold = 2</b> ), the circuit breaker goes to closed state.
+<p><b>3. Test Fall back</b> : This button demonstarates the Microprofile Fault tolerance Fall back feature.
+<br>
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;<b>@Fallback(fallbackMethod="fallbackDepartment")</b>
+<br>
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;Annotating the method with the above annotation makes the service invoke the fall back method mentioned in the configuration during an exception 
+<br>
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;or in case of circuit breaker open state.
+<p><b>4. Test Microprofile Config</b> : This button demonstrates the Microprofile config feature in which application configuration data that are present
+<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;&nbsp; in different locations are loaded. The configuration source file with higher ordinal value gets preference over others.
+<br>&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;&nbsp; This approach allows to pick up configured values immediately after they are changed.
+
+<p><b>5. Test Microprofile retry</b> : This button demonstrates the Microprofile fault tolerance retry feature where a service invoked by a request 
+<br>
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;on exception retries invoking the same service as per the retry configuration done.
+<br>
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;<b>@Retry(maxRetries = 90, maxDuration= 10000)</b>
+<br>
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;One of the simple configuration used in the application is to make maximum of 90 retries or retry for maximum of 10 seconds which ever happens first.
+<p><b>6. Microprofile Timeout</b> : This button demonstrates the Microprofile Fault tolerance timeout feature in which maximum duration 
+for processing a request by a service can be set.
+<br>
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;<b>@Timeout(5000)</b>
+<br>
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;This approach helps in preventing the service from going into indefinite time in processing due to unknown exception occurred.
+<br>
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;This application has the service which takes 3 seconds to respond if working fine but due to an exception,
+<br>
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;it takes 10 seconds to respond. Thanks to Time out config set at 5 seconds which gives back the error response.
+
+<p><b>7. Microprofile Bulkhead</b> : This button demonstrates the Microprofile Fault tolerance bulkhead feature in which number of concurrent
+requests invoking a service can be managed.
+<br>
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;<b>@Bulkhead(5)</b>
+<br>
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;Above configuration makes a service accept 5 concurrent requests at any given time above which it throws an exception.
+<br>
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;In order to test this, open developer tools (press F12) -> go to Network tab in it -> clear the exisitng entires and press the Bulkhead button more than 5 times. This will
+<br>
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;list all the requests in the developer tool network tab. The first 5 requests gets the success response whereas the rest gets the exception message.
+
+</div>
+
+
+
+</body>
+</html>
