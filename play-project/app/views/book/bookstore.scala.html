@@ -1,0 +1,16 @@
+@( books : List[Book] )
+
+@layout("All Books"){
+
+    <p> <h1> Books </h1>  </p>
+
+    <a href="@routes.BookController.create()">Add new book</a><br><br>
+
+    @for(book <- books){
+
+        <a href="@routes.BookController.view(book.getId())">@book.getTitle()</a>
+        <p>@book.getAuthor()</p>
+        <p>@book.getPrice()</p>
+        <br>
+    }
+}
