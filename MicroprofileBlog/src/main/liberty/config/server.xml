@@ -1,0 +1,8 @@
+<server description="Default Server for Microprofile">
+  <featureManager>
+    <feature>microProfile-1.2</feature>    
+  </featureManager>
+    
+    <httpEndpoint httpPort="${default.http.port}" httpsPort="${default.https.port}" id="defaultHttpEndpoint"  host="*" />
+    <webApplication contextRoot="/MicroprofileBlog" location="MicroprofileBlog.war"/>
+</server>
